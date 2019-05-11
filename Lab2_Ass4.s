@@ -9,6 +9,10 @@
 # Definition von symbolen Konstanten
 ###############################################
 	.equ STACK_SIZE, 0x400	# stack size
+	.equ PUSH_r3_1, subi sp, sp, 4
+	.equ PUSH_r3_2, stw r3, (sp)
+	.equ POP_r3_1, ldw r3, (sp)
+	.equ POP_r3_2, addi sp, sp, 4
 ###############################################
 # DATA SECTION
 # assumption: 12 kByte data section (0 - 0x2fff)
@@ -54,35 +58,51 @@ LOOP:
 	br LOOP		# check for the key pressed again
 
 read_INCREM_BUTTON:
-	movia r9, 0x840		# r9 <- 0x840
-	ldw r9, (r9)		# r9 <- (0x840)
-	andi r9, r9, 0x1	# r9 <- masked value of (0x840)
-	beq r9, r0, return_INCREM_BUTTON	# if r9==0 => goto return_INCREM_BUTTON 
+	subi sp, sp, 4		# PUSH_r3_1
+	stw r3, (sp)		# PUSH_r3_2
+	movia r3, 0x840		# r3 <- 0x840
+	ldw r3, (r3)		# r3 <- (0x840)
+	andi r3, r3, 0x1	# r3 <- masked value of (0x840)
+	beq r3, r0, return_INCREM_BUTTON	# if r3==0 => goto return_INCREM_BUTTON 
 	addi r2, r2, 1		# COUNTER++ 
 return_INCREM_BUTTON:
+	ldw r3, (sp)		# POP_r3_1
+	addi sp, sp, 4		# POP_r3_2
 	ret			# return
 
 read_DECREM_BUTTON:
-	movia r9, 0x840		# r9 <- 0x840
-	ldw r9, (r9)		# r9 <- (0x840)
-	andi r9, r9, 0x2	# r9 <- masked value of (0x840)
-	beq r9, r0, return_DECREM_BUTTON	# if r9==0 => goto return_DECREM_BUTTON 
+	subi sp, sp, 4		# PUSH_r3_1
+	stw r3, (sp)		# PUSH_r3_2
+	movia r3, 0x840		# r3 <- 0x840
+	ldw r3, (r3)		# r3 <- (0x840)
+	andi r3, r3, 0x2	# r3 <- masked value of (0x840)
+	beq r3, r0, return_DECREM_BUTTON	# if r3==0 => goto return_DECREM_BUTTON 
 	subi r2, r2, 1		# COUNTER-- 
 return_DECREM_BUTTON:
+	ldw r3, (sp)		# POP_r3_1
+	addi sp, sp, 4		# POP_r3_2
 	ret			# return
 
 read_CLEAR_BUTTON:
-	movia r9, 0x840		# r9 <- 0x840
-	ldw r9, (r9)		# r9 <- (0x840)
-	andi r9, r9, 0x8	# r9 <- masked value of (0x840)
-	beq r9, r0, return_CLEAR_BUTTON	# if r9==0 => goto return_CLEAR_BUTTON 
+	subi sp, sp, 4		# PUSH_r3_1
+	stw r3, (sp)		# PUSH_r3_2
+	movia r3, 0x840		# r3 <- 0x840
+	ldw r3, (r3)		# r3<- (0x840)
+	andi r3, r3, 0x8	# r3 <- masked value of (0x840)
+	beq r3, r0, return_CLEAR_BUTTON	# if r3==0 => goto return_CLEAR_BUTTON 
 	mov r2, r0		# COUNTER=0
 return_CLEAR_BUTTON:
+	ldw r3, (sp)		# POP_r3_1
+	addi sp, sp, 4		# POP_r3_2
 	ret			# return
 
 write_LED:
-	movia r3, 0x810		# r3 <- 0x810=output_register_address)
-	stw r2, (r3)		# r7 -> (r2) parameter -> output_register
+	subi sp, sp, 4		# PUSH_r3_1
+	stw r3, (sp)		# PUSH_r3_2
+	movia r3, 0x810		# r3 <- 0x810=output_register_address
+	stw r2, (r3)		# r2 -> (r3) parameter -> output_register
+	ldw r3, (sp)		# POP_r3_1
+	addi sp, sp, 4		# POP_r3_2
 ret
 
 endloop:
